@@ -1,0 +1,63 @@
+- name: Install Docker and Deploy App
+  hosts: web
+  become: true
+
+  tasks:
+    - name: Update apt
+      apt:
+        update_cache: yes
+
+    - name: Install packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - software-properties-common
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repo
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+
+    - name: Add user to docker group
+      user:
+        name: azureuser
+        groups: docker
+        append: yes
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Copy docker-compose.yml to VM
+      copy:
+        src: docker-compose.yml
+        dest: /home/azureuser/docker-compose.yml
+        owner: azureuser
+        group: azureuser
+        mode: '0644'
+
+    - name: Deploy app using Docker Compose
+      become_user: azureuser
+      shell: docker compose -f /home/azureuser/docker-compose.yml up -d
+      args:
+        chdir: /home/azureuser
+
