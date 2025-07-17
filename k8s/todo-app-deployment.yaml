@@ -26,7 +26,7 @@ spec:
       containers:
       - env:
         - name: MONGODB_URL
-          value: mongodb+srv://ahmedtaha:*Gonextgo*@cluster0.xyee50w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+          value: ${{ secrets.MONGODB_CONNECTIONSTRING }}
         image: tahaaa894/silver-task:latest
         imagePullPolicy: ""
         name: todo-app
